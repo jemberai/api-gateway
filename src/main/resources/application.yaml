@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: spring-cloud-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AUTH_SERVER_URI:'http://localhost:9000'}
+          jwk-set-uri: http://${AUTH_SERVER:localhost}:${AUTH_SERVER_PORT:9000}/oauth2/jwks
+  profiles:
+    active: json-logs
+  cloud:
+    gateway:
+      routes:
+        - id: auth-server
+          uri: http://${AUTH_SERVER:localhost}:${AUTH_SERVER_PORT:9000}
+          predicates:
+              - Path=/oauth2/**
+        - id: data-intake-server
+          uri: http://${DATA_INTAKE_SERVER:localhost}:${DATA_INTAKE_SERVER_PORT:8082}
+          predicates:
+              - Path=/v1/event/**
+        - id: data-intake-server-query
+          uri: http://${DATA_INTAKE_SERVER:localhost}:${DATA_INTAKE_SERVER_PORT:8082}
+          predicates:
+            - Path=/v1/query/**
+        - id: data-intake-oa3
+          uri: http://${DATA_INTAKE_OA3_SERVER:localhost}:${DATA_INTAKE_OA3_SERVER_PORT:8083}
+          predicates:
+              - Path=/data-intake-oa3/**
+          filters:
+              - StripPrefix=1
+        - id: streamlit-chat
+          uri: http://${CHAT_SERVER:localhost}:${CHAT_SERVER_PORT:8084}
+          predicates:
+            - Path=/chat/**
+          filters:
+              - StripPrefix=1
+      metrics:
+        tags:
+          path:
+            enabled: true
+    #reactor:
+   # context-propagation: auto
+  #ENABLE BELOW FOR TROUBLESHOOTING
+management:
+    endpoint:
+      health:
+        probes:
+            enabled: true
+    health:
+      livenessState:
+        enabled: true
+      readinessState:
+        enabled: true
+    tracing:
+      sampling:
+        probability: 0.5
+      enabled: true
+
+ #ENABLE BELOW FOR TROUBLESHOOTING
+#  httpserver:
+#    wiretap: true
+#  httpclient:
+#    wiretap: true
+# logging:
+#  level:
+#    root: error
+#    reactor.netty: trace
+#    org.springframework.cloud.gateway: trace
+logging:
+  pattern:
+        level: | 
+          [${spring.application.name:},%X{traceId:-},%X{spanId:-}]
+  level:
+    root: ${LOG_LEVEL:info}
+    org.zalando.logbook: trace
+#    org.springframework.http.server.reactive: trace
