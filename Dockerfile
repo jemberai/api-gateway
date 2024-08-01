@@ -5,7 +5,7 @@ ADD ./target/classes/.env ./
 ADD ./target/*.jar ./
 
 # Extracts the layers from the jar file
-RUN source ./.env && java -Djarmode=layertools -jar ${JAR_FILE} extract
+RUN . ./.env && java -Djarmode=layertools -jar ${JAR_FILE} extract
 
 FROM eclipse-temurin:21.0.3_9-jdk
 
