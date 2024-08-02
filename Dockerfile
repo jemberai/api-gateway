@@ -7,7 +7,7 @@ ADD ./target/*.jar ./
 # Extracts the layers from the jar file
 RUN . ./.env && java -Djarmode=layertools -jar ${JAR_FILE} extract
 
-FROM eclipse-temurin:21.0.3_9-jdk
+FROM eclipse-temurin:21.0.4_7-jre-alpine
 
 # incorporating best practices from snyk.io
 # see: https://snyk.io/blog/best-practices-to-build-java-containers-with-docker/
@@ -19,9 +19,8 @@ COPY --from=builder application/snapshot-dependencies/ ./
 COPY --from=builder application/application/ ./
 
 RUN apk add dumb-init && \
-  addgroup --system javauser && \
-  adduser --system --shell /bin/false --no-create-home --ingroup javauser javauser  && \
-  chown -R javauser:javauser /application \
+  addgroup --system javauser && adduser -S -s /bin/false -G javauser javauser && \
+  chown -R javauser:javauser /application
 
 USER javauser
 
