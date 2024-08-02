@@ -1,4 +1,4 @@
-name: Publish Spring Cloud Gateway image (amd64)
+name: Publish API Gateway Image (amd64)
 
 concurrency:
   group: build-${{ github.ref }}
